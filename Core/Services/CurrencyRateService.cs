@@ -12,7 +12,7 @@ public class CurrencyRateService(
     private readonly ICurrencyRateRepository _rateRepository = rateRepository;
     private readonly ICurrencyRateCache _cache = cache;
     public virtual async Task UpdateRatesAsync()
-    { 
+    {
         var rates = await _rateProvider.GetLatestRatesFromEcbAsync();
         var rowsAffected = await _rateRepository.UpsertRatesAsync(rates);
         //var today = DateTime.UtcNow;

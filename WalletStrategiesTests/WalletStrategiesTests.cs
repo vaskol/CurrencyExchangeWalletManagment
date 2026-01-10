@@ -1,5 +1,5 @@
-using Core.Strategies;
 using Core.Exceptions;
+using Core.Strategies;
 
 namespace WalletStrategyTests;
 

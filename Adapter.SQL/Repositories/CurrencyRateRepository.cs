@@ -1,12 +1,9 @@
 ﻿using Adapter.SQL.Data;
 using Core.Entities;
 using Core.Ports;
-using Core.Utilities;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Globalization;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Adapter.SQL.Repositories;
 
 public class CurrencyRateRepository(AppDbContext dbContext, ILoggerFactory loggerFactory) : ICurrencyRateRepository
@@ -75,7 +72,7 @@ public class CurrencyRateRepository(AppDbContext dbContext, ILoggerFactory logge
         return await _dbContext.CurrencyRates
             .Where(r => r.Currency == currencyCode && r.RateDate <= targetDate)
             .OrderByDescending(r => r.RateDate)
-            .Select(r => (decimal?)r.Rate) 
+            .Select(r => (decimal?)r.Rate)
             .FirstOrDefaultAsync();
     }
 

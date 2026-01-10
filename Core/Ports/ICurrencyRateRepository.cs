@@ -1,5 +1,4 @@
 ﻿using Core.Entities;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Core.Ports;
 

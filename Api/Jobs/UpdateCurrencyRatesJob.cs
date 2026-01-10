@@ -1,5 +1,4 @@
-﻿using Adapter.ECB;
-using Core.Services;
+﻿using Core.Services;
 using Quartz;
 
 namespace Api.Jobs;

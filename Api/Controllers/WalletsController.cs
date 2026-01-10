@@ -23,12 +23,12 @@ public class WalletsController(
     public async Task<ActionResult<WalletResponse>> CreateWallet([FromBody] CreateWalletRequest request)
     {
         var allowedCurrencies = _configuration.GetSection("AllowedCurrencies").Get<string[]>();
-        if (string.IsNullOrWhiteSpace(request.Currency) ||!allowedCurrencies.Contains(request.Currency.ToUpper()))
+        if (string.IsNullOrWhiteSpace(request.Currency) || !allowedCurrencies.Contains(request.Currency.ToUpper()))
         {
             return BadRequest($"Invalid currency. Allowed currencies: {string.Join(", ", allowedCurrencies)}");
         }
 
-        var wallet = await _walletService.CreateWalletAsync( 
+        var wallet = await _walletService.CreateWalletAsync(
             request.Id,
             request.Currency.ToUpper(),
             request.InitialBalance);
@@ -49,14 +49,14 @@ public class WalletsController(
     // GET /api/wallets/{walletId}?currency={currency}
     // ------------------------------------------------------------
     [HttpGet("{walletId:long}")]
-    public async Task<ActionResult<WalletResponse>> GetWallet(long walletId,[FromQuery] string? currency)
+    public async Task<ActionResult<WalletResponse>> GetWallet(long walletId, [FromQuery] string? currency)
     {
         var wallet = await _walletService.GetWalletAsync(walletId);
         if (wallet is null)
             return NotFound();
 
         var allowedCurrencies = _configuration.GetSection("AllowedCurrencies").Get<string[]>();
-        if (string.IsNullOrWhiteSpace(currency) ||!allowedCurrencies.Contains(currency.ToUpper()))
+        if (string.IsNullOrWhiteSpace(currency) || !allowedCurrencies.Contains(currency.ToUpper()))
         {
             return BadRequest($"Invalid currency. Allowed currencies: {string.Join(", ", allowedCurrencies)}");
         }
@@ -64,14 +64,14 @@ public class WalletsController(
         decimal balance = wallet.Balance;
         string resultCurrency = wallet.Currency;
 
-        if (!string.IsNullOrWhiteSpace(currency) &&!currency.Equals(wallet.Currency, StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrWhiteSpace(currency) && !currency.Equals(wallet.Currency, StringComparison.OrdinalIgnoreCase))
         {
             // Convert using today’s rates
             balance = await _currencyRateService.ConvertAsync(
                 wallet.Balance,
                 wallet.Currency,
-                currency.ToUpper(),          
-                DateTime.UtcNow.Date          
+                currency.ToUpper(),
+                DateTime.UtcNow.Date
             );
             resultCurrency = currency.ToUpper();
         }
@@ -79,7 +79,7 @@ public class WalletsController(
         return new WalletResponse
         {
             Id = wallet.Id,
-            Balance = balance,      
+            Balance = balance,
             Currency = resultCurrency
         };
     }
@@ -88,14 +88,14 @@ public class WalletsController(
     // POST /api/wallets/{walletId}/adjustbalance
     // ------------------------------------------------------------
     [HttpPost("{walletId:long}/adjustbalance")]
-    public async Task<IActionResult> AdjustBalance(long walletId,[FromQuery] decimal amount,[FromQuery] string currency,[FromQuery] string strategy)
+    public async Task<IActionResult> AdjustBalance(long walletId, [FromQuery] decimal amount, [FromQuery] string currency, [FromQuery] string strategy)
     {
         var wallet = await _walletService.GetWalletAsync(walletId);
         if (wallet is null)
             return NotFound();
 
         var allowedCurrencies = _configuration.GetSection("AllowedCurrencies").Get<string[]>();
-        if (string.IsNullOrWhiteSpace(currency) ||!allowedCurrencies.Contains(currency.ToUpper()))
+        if (string.IsNullOrWhiteSpace(currency) || !allowedCurrencies.Contains(currency.ToUpper()))
         {
             return BadRequest($"Invalid currency. Allowed currencies: {string.Join(", ", allowedCurrencies)}");
         }

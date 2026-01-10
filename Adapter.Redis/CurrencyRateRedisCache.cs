@@ -23,7 +23,7 @@ public class CurrencyRateRedisCache(IDistributedCache cache, ILoggerFactory logg
             var rates = JsonSerializer.Deserialize<Dictionary<string, decimal>>(json);
             return rates?.GetValueOrDefault(currency);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get latest currency rate from cache for {Currency} on {Date}", currency, date);
             return null;
@@ -37,17 +37,17 @@ public class CurrencyRateRedisCache(IDistributedCache cache, ILoggerFactory logg
         {
             var date = rates.Max(r => r.RateDate).Date;
 
-        var dict = rates
-            .GroupBy(r => r.Currency)
-            .ToDictionary(g => g.Key, g => g.OrderByDescending(x => x.RateDate).First().Rate);
+            var dict = rates
+                .GroupBy(r => r.Currency)
+                .ToDictionary(g => g.Key, g => g.OrderByDescending(x => x.RateDate).First().Rate);
 
-        await _cache.SetStringAsync(
-            Key(date),
-            JsonSerializer.Serialize(dict),
-            new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24)
-            });
+            await _cache.SetStringAsync(
+                Key(date),
+                JsonSerializer.Serialize(dict),
+                new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24)
+                });
         }
         catch (Exception ex)
         {

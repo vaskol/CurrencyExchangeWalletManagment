@@ -3,9 +3,9 @@ using Microsoft.Extensions.Logging;
 namespace EcbCurrencyRateProviderTests;
 public class EcbCurrencyRateProviderTests
 {
-    [Fact] 
+    [Fact]
     public async Task ShouldFetchRatesFromEcb()
-    { 
+    {
         var provider = new EcbCurrencyRateProvider(new HttpClient(), new LoggerFactory());
 
         var rates = await provider.GetLatestRatesFromEcbAsync();
@@ -14,4 +14,3 @@ public class EcbCurrencyRateProviderTests
         Assert.True(rates.Any());
     }
 }
-    

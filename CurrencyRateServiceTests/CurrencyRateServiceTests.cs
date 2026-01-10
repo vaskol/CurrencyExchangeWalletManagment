@@ -1,8 +1,7 @@
-using Xunit;
-using Moq;
+using Core.Entities;
 using Core.Ports;
 using Core.Services;
-using Core.Entities;
+using Moq;
 namespace CurrencyRateServiceTests;
 public class CurrencyRateServiceTests
 {

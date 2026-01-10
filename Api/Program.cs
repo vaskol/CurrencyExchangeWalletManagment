@@ -2,10 +2,10 @@ using Adapter.ECB;
 using Adapter.Redis;
 using Adapter.SQL.Data;
 using Adapter.SQL.Repositories;
+using Api.Jobs;
 using Core.Ports;
 using Core.Services;
 using Microsoft.EntityFrameworkCore;
-using Api.Jobs;
 using Quartz;
 
 
@@ -44,7 +44,7 @@ builder.Services.AddQuartz(q =>
              .RepeatForever()));
 });
 
-builder.Services.AddQuartzHostedService(q =>{q.WaitForJobsToComplete = true;});
+builder.Services.AddQuartzHostedService(q => { q.WaitForJobsToComplete = true; });
 
 // HTTP client for ECB
 builder.Services.AddHttpClient<ICurrencyRateProvider, EcbCurrencyRateProvider>();

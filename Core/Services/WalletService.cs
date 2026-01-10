@@ -1,7 +1,6 @@
 ﻿using Core.Entities;
-using Core.Strategies;
 using Core.Ports;
-using Core.Utilities;
+using Core.Strategies;
 namespace Core.Services;
 
 public class WalletService(IWalletRepository walletRepository)
@@ -10,7 +9,7 @@ public class WalletService(IWalletRepository walletRepository)
 
     public virtual async Task<Wallet> CreateWalletAsync(long id, string currency, decimal initialBalance = 0)
     {
-       //var initBalance = NumberFormattingHelper.ToPrettyAmount(initialBalance); 
+        //var initBalance = NumberFormattingHelper.ToPrettyAmount(initialBalance); 
         Wallet wallet = new Wallet(id, currency, initialBalance);
         await _walletRepository.AddAsync(wallet);
         return wallet;

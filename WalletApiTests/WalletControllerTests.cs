@@ -1,7 +1,5 @@
-using Adapter.SQL;
 using Api.Contracts;
 using Api.Controllers;
-using Azure.Core;
 using Core.Entities;
 using Core.Ports;
 using Core.Services;
@@ -24,9 +22,9 @@ public class WalletControllerTests
         var walletService = new WalletService(walletRepositoryMock.Object);
 
         var currencyRateService = new CurrencyRateService(
-            rateProviderMock.Object,   
-            cacheMock.Object,          
-            rateRepositoryMock.Object  
+            rateProviderMock.Object,
+            cacheMock.Object,
+            rateRepositoryMock.Object
         );
         var inMemoryConfig = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
@@ -141,9 +139,9 @@ public class WalletControllerTests
         var currency = "USD";
 
         walletServiceMock.Setup(x => x.GetWalletAsync(wallet.Id)).ReturnsAsync(wallet);
-       
+
         currencyRateServiceMock.Setup(x => x.ConvertAsync(wallet.Balance, wallet.Currency, currency, It.IsAny<DateTime>()))
-            .ReturnsAsync(110); 
+            .ReturnsAsync(110);
 
         // Act
         var result = await controller.GetWallet(wallet.Id, currency);
