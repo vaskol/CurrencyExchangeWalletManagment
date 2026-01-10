@@ -24,7 +24,7 @@ public class WalletService(IWalletRepository walletRepository)
     public virtual async Task AdjustWalletBalanceAsync(long walletId, decimal amount, IWalletAdjustmentStrategy strategy)
     {
         var wallet = await _walletRepository.GetByIdAsync(walletId);
-        if (wallet == null)
+        if (wallet is null)
             throw new InvalidOperationException($"Wallet {walletId} not found");
 
         //var amt = NumberFormattingHelper.ToPrettyAmount(amount);

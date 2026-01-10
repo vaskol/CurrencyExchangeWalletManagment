@@ -15,8 +15,6 @@ public class Wallet(long id, string currency, decimal initialBalance = 0)
 
         Balance = strategy.Adjust(Balance, amount);
     }
-
-    // todo
     private Wallet() : this(0, string.Empty, 0) { }
 
 }

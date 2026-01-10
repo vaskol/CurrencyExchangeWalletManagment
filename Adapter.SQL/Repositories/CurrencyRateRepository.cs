@@ -15,7 +15,7 @@ public class CurrencyRateRepository(AppDbContext dbContext) : ICurrencyRateRepos
     public async Task<int> UpsertRatesAsync(List<CurrencyRate> rates)
     {
         int totalRecordsAffected = 0;
-        if (rates == null || !rates.Any())
+        if (rates is null || !rates.Any())
             return 0;
 
         var parameters = new List<SqlParameter>();

@@ -13,7 +13,7 @@ public class CurrencyRateRedisCache(IDistributedCache cache) : ICurrencyRateCach
     public async Task<decimal?> GetLatestRateFromCacheAsync(string currency, DateTime date)
     {
         var json = await _cache.GetStringAsync(Key(date));
-        if (json == null)
+        if (json is null)
             return null;
 
         var rates = JsonSerializer.Deserialize<Dictionary<string, decimal>>(json);

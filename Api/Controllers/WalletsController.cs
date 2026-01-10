@@ -52,7 +52,7 @@ public class WalletsController(
     public async Task<ActionResult<WalletResponse>> GetWallet(long walletId,[FromQuery] string? currency)
     {
         var wallet = await _walletService.GetWalletAsync(walletId);
-        if (wallet == null)
+        if (wallet is null)
             return NotFound();
 
         var allowedCurrencies = _configuration.GetSection("AllowedCurrencies").Get<string[]>();
@@ -91,7 +91,7 @@ public class WalletsController(
     public async Task<IActionResult> AdjustBalance(long walletId,[FromQuery] decimal amount,[FromQuery] string currency,[FromQuery] string strategy)
     {
         var wallet = await _walletService.GetWalletAsync(walletId);
-        if (wallet == null)
+        if (wallet is null)
             return NotFound();
 
         var allowedCurrencies = _configuration.GetSection("AllowedCurrencies").Get<string[]>();

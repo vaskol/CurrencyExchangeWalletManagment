@@ -15,7 +15,7 @@ namespace Adapter.ECB
             var ns = doc.Root!.GetDefaultNamespace();
 
             var dailyCube = doc.Descendants(ns + "Cube").FirstOrDefault(x => x.Attribute("time") != null);
-            if (dailyCube == null)
+            if (dailyCube is null)
                 throw new InvalidOperationException("ECB XML does not contain a daily Cube element");
 
             var rateDate = DateTime.ParseExact(dailyCube.Attribute("time")!.Value,"yyyy-MM-dd",CultureInfo.InvariantCulture);
