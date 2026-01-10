@@ -26,63 +26,24 @@ public class CurrencyRateService(
     }
     public virtual async Task<decimal> GetLatestRateAsync(string currency, DateTime date)
     {
-        //// Try Redis first
-        //var cached = await _cache.GetLatestRateFromCacheAsync(currency, date);
-        //if (cached.HasValue)
-        //    return cached.Value;
+        // Redis first
+        var cached = await _cache.GetLatestRateFromCacheAsync(currency, date);
+        if (cached.HasValue)
+            return cached.Value;
 
-        //// Fallback to SQL
-        //var dbRate = await _rateRepository.GetLatestRateAsync(currency, date);
-        //if (!dbRate.HasValue)
-        //    throw new Exception("Rate not found");
-
-        //// Write back single rate to Redis (wrap in list)
-        //await _cache.SetLatestRatesToCacheAsync(new List<CurrencyRate>
-        //{
-        //    new() {
-        //        Currency = currency,
-        //        RateDate = date,
-        //        Rate = dbRate.Value
-        //    }
-        //});
-
-        //return dbRate.Value;
-        try
-        {
-            var cached = await _cache.GetLatestRateFromCacheAsync(currency, date);
-            if (cached.HasValue)
-                return cached.Value;
-        }
-        catch (Exception ex)
-        {
-            // Redis might be down or unreachable
-            // Log the exception with context
-            //_logger.LogWarning(ex, "Failed to retrieve rate for {Currency} on {Date} from cache.", currency, date);
-        }
-
-        // 2. Fallback to SQL
+        // Fallback to SQL
         var dbRate = await _rateRepository.GetLatestRateAsync(currency, date);
         if (!dbRate.HasValue)
-            throw new Exception($"Rate not found for currency '{currency}' on {date:yyyy-MM-dd}");
+            throw new Exception("Rate not found");
 
-        // 3. Best-effort cache write
-        try
+        await _cache.SetLatestRatesToCacheAsync(new List<CurrencyRate>
         {
-            await _cache.SetLatestRatesToCacheAsync(new List<CurrencyRate>
-        {
-            new()
-            {
+            new() {
                 Currency = currency,
                 RateDate = date,
                 Rate = dbRate.Value
             }
         });
-        }
-        catch (Exception ex)
-        {
-            // Log cache write failure, but don't throw
-           // _logger.LogWarning(ex, "Failed to write rate for {Currency} on {Date} to cache.", currency, date);
-        }
 
         return dbRate.Value;
     }

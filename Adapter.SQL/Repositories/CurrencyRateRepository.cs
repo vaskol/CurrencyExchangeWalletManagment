@@ -4,40 +4,42 @@ using Core.Ports;
 using Core.Utilities;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Globalization;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Adapter.SQL.Repositories;
 
-public class CurrencyRateRepository(AppDbContext dbContext) : ICurrencyRateRepository
+public class CurrencyRateRepository(AppDbContext dbContext, ILoggerFactory loggerFactory) : ICurrencyRateRepository
 {
     private readonly AppDbContext _dbContext = dbContext;
-
+    private readonly ILogger _logger = loggerFactory.CreateLogger<CurrencyRateRepository>();
     public async Task<int> UpsertRatesAsync(List<CurrencyRate> rates)
     {
         int totalRecordsAffected = 0;
         if (rates is null || !rates.Any())
             return 0;
-
-        var parameters = new List<SqlParameter>();
-        var valueStrings = new List<string>();
-
-        for (int i = 0; i < rates.Count; i++)
+        try
         {
-            var r = rates[i];
-            valueStrings.Add($"(@currency{i}, @rate{i}, @rateDate{i})");
+            var parameters = new List<SqlParameter>();
+            var valueStrings = new List<string>();
 
-            parameters.AddRange(new[]
+            for (int i = 0; i < rates.Count; i++)
             {
+                var r = rates[i];
+                valueStrings.Add($"(@currency{i}, @rate{i}, @rateDate{i})");
+
+                parameters.AddRange(new[]
+                {
                 new SqlParameter($"@currency{i}", r.Currency),
                 new SqlParameter($"@rate{i}", r.Rate),
                 new SqlParameter($"@rateDate{i}", r.RateDate),
                 //new SqlParameter($"@ratePretty{i}", NumberFormattingHelper.ToPrettyAmount(r.Rate)) IF we want
             });
-        }
+            }
 
-        var valuesClause = string.Join(", ", valueStrings);
+            var valuesClause = string.Join(", ", valueStrings);
 
-        var sql = $@"
+            var sql = $@"
             DECLARE @OutputTable TABLE (AffectedRows INT);
             MERGE INTO CurrencyRate AS target
             USING (VALUES {valuesClause}) AS source (Currency, Rate, RateDate)
@@ -58,25 +60,22 @@ public class CurrencyRateRepository(AppDbContext dbContext) : ICurrencyRateRepos
             SELECT COUNT(*) FROM @OutputTable;
             ";
 
-         totalRecordsAffected= await _dbContext.Database.ExecuteSqlRawAsync(sql, parameters.ToArray());
-        return totalRecordsAffected;
-
+            totalRecordsAffected = await _dbContext.Database.ExecuteSqlRawAsync(sql, parameters.ToArray());
+            return totalRecordsAffected;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to upsert rates in the database");
+            throw;
+        }
     }
-
-    //public async Task<decimal?> GetRateAsync(string currencyCode, DateTime date)
-    //{
-    //    return await _dbContext.CurrencyRates
-    //        .Where(r => r.Currency == currencyCode && r.RateDate == date)
-    //        .Select(r => (decimal?)r.Rate)
-    //        .FirstOrDefaultAsync();
-    //}
 
     public async Task<decimal?> GetLatestRateAsync(string currencyCode, DateTime targetDate)
     {
         return await _dbContext.CurrencyRates
             .Where(r => r.Currency == currencyCode && r.RateDate <= targetDate)
             .OrderByDescending(r => r.RateDate)
-            .Select(r => (decimal?)r.Rate) // select the Rate property
+            .Select(r => (decimal?)r.Rate) 
             .FirstOrDefaultAsync();
     }
 

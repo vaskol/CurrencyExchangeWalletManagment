@@ -1,47 +1,57 @@
-﻿using System.Globalization;
-using System.Xml.Linq;
+﻿using Core.Entities;
 using Core.Ports;
-using Core.Entities;
+using Microsoft.Extensions.Logging;
+using System.Globalization;
+using System.Xml.Linq;
 namespace Adapter.ECB
 {
-    public class EcbCurrencyRateProvider(HttpClient httpClient) : ICurrencyRateProvider
+    public class EcbCurrencyRateProvider(HttpClient httpClient, ILoggerFactory loggerFactory) : ICurrencyRateProvider
     {
         private readonly HttpClient _httpClient = httpClient;
+        private readonly ILogger _logger = loggerFactory.CreateLogger<EcbCurrencyRateProvider>();
         public async Task<List<CurrencyRate>> GetLatestRatesFromEcbAsync()
         {
-            var url = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
-            var xmlString = await _httpClient.GetStringAsync(url);
-            var doc = XDocument.Parse(xmlString);
-            var ns = doc.Root!.GetDefaultNamespace();
-
-            var dailyCube = doc.Descendants(ns + "Cube").FirstOrDefault(x => x.Attribute("time") != null);
-            if (dailyCube is null)
-                throw new InvalidOperationException("ECB XML does not contain a daily Cube element");
-
-            var rateDate = DateTime.ParseExact(dailyCube.Attribute("time")!.Value,"yyyy-MM-dd",CultureInfo.InvariantCulture);
-
-            var rates = dailyCube.Elements(ns + "Cube")
-                 .Select(x => new CurrencyRate
-                 {
-                     Currency = x.Attribute("currency")!.Value,
-                     Rate = decimal.Parse(
-                         x.Attribute("rate")!.Value,
-                         NumberStyles.Any,
-                         CultureInfo.InvariantCulture
-                     ),
-                     RateDate = rateDate
-                 })
-                 .ToList();
-
-            // Add EUR manually, which is the base currency
-            rates.Add(new CurrencyRate
+            try
             {
-                Currency = "EUR",
-                Rate = 1m,
-                RateDate = rateDate
-            });
+                var url = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
+                var xmlString = await _httpClient.GetStringAsync(url);
+                var doc = XDocument.Parse(xmlString);
+                var ns = doc.Root!.GetDefaultNamespace();
 
-            return rates;
+                var dailyCube = doc.Descendants(ns + "Cube").FirstOrDefault(x => x.Attribute("time") != null);
+                if (dailyCube is null)
+                    throw new InvalidOperationException("ECB XML does not contain a daily Cube element");
+
+                var rateDate = DateTime.ParseExact(dailyCube.Attribute("time")!.Value, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+                var rates = dailyCube.Elements(ns + "Cube")
+                     .Select(x => new CurrencyRate
+                     {
+                         Currency = x.Attribute("currency")!.Value,
+                         Rate = decimal.Parse(
+                             x.Attribute("rate")!.Value,
+                             NumberStyles.Any,
+                             CultureInfo.InvariantCulture
+                         ),
+                         RateDate = rateDate
+                     })
+                     .ToList();
+
+                // Add EUR manually, which is the base currency
+                rates.Add(new CurrencyRate
+                {
+                    Currency = "EUR",
+                    Rate = 1m,
+                    RateDate = rateDate
+                });
+
+                return rates;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to fetch or parse ECB rates");
+                throw;
+            }
         }
     }
 }
