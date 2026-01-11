@@ -55,25 +55,33 @@ public class WalletsController(
         if (wallet is null)
             return NotFound();
 
-        var allowedCurrencies = _configuration.GetSection("AllowedCurrencies").Get<string[]>();
-        if (string.IsNullOrWhiteSpace(currency) || !allowedCurrencies.Contains(currency.ToUpper()))
-        {
-            return BadRequest($"Invalid currency. Allowed currencies: {string.Join(", ", allowedCurrencies)}");
-        }
+        var resultCurrency = wallet.Currency;
+        var balance = wallet.Balance;
 
-        decimal balance = wallet.Balance;
-        string resultCurrency = wallet.Currency;
-
-        if (!string.IsNullOrWhiteSpace(currency) && !currency.Equals(wallet.Currency, StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrWhiteSpace(currency))
         {
-            // Convert using today’s rates
-            balance = await _currencyRateService.ConvertAsync(
-                wallet.Balance,
-                wallet.Currency,
-                currency.ToUpper(),
-                DateTime.UtcNow.Date
-            );
-            resultCurrency = currency.ToUpper();
+            var allowedCurrencies =
+                _configuration.GetSection("AllowedCurrencies").Get<string[]>() ?? [];
+
+            var requestedCurrency = currency.ToUpperInvariant();
+
+            if (!allowedCurrencies.Contains(requestedCurrency))
+            {
+                return BadRequest(
+                    $"Invalid currency. Allowed currencies: {string.Join(", ", allowedCurrencies)}");
+            }
+
+            if (!requestedCurrency.Equals(wallet.Currency, StringComparison.OrdinalIgnoreCase))
+            {
+                balance = await _currencyRateService.ConvertAsync(
+                    wallet.Balance,
+                    wallet.Currency,
+                    requestedCurrency,
+                    DateTime.UtcNow.Date
+                );
+
+                resultCurrency = requestedCurrency;
+            }
         }
 
         return new WalletResponse
@@ -88,14 +96,18 @@ public class WalletsController(
     // POST /api/wallets/{walletId}/adjustbalance
     // ------------------------------------------------------------
     [HttpPost("{walletId:long}/adjustbalance")]
-    public async Task<IActionResult> AdjustBalance(long walletId, [FromQuery] decimal amount, [FromQuery] string currency, [FromQuery] string strategy)
+    public async Task<IActionResult> AdjustBalance(long walletId, [FromQuery] decimal amount, [FromQuery] string? currency, [FromQuery] string strategy)
     {
         var wallet = await _walletService.GetWalletAsync(walletId);
         if (wallet is null)
             return NotFound();
 
+        // If currency is not provided, default to wallet's currency
+        if (string.IsNullOrWhiteSpace(currency))
+            currency = wallet.Currency;
+
         var allowedCurrencies = _configuration.GetSection("AllowedCurrencies").Get<string[]>();
-        if (string.IsNullOrWhiteSpace(currency) || !allowedCurrencies.Contains(currency.ToUpper()))
+        if (!allowedCurrencies.Contains(currency.ToUpper()))
         {
             return BadRequest($"Invalid currency. Allowed currencies: {string.Join(", ", allowedCurrencies)}");
         }
@@ -121,4 +133,5 @@ public class WalletsController(
 
         return NoContent();
     }
+
 }

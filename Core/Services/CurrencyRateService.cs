@@ -19,16 +19,16 @@ public class CurrencyRateService(
 
         //CHECK THIS await _rateRepository.UpsertRatesAsync(rates);
 
-        if (rowsAffected > 0)
-        {
+        //if (rowsAffected > 0)
+        //{
             await _cache.SetLatestRatesToCacheAsync(rates);
-        }
+        //}
     }
     public virtual async Task<decimal> GetLatestRateAsync(string currency, DateTime date)
     {
         // Redis first
         var cached = await _cache.GetLatestRateFromCacheAsync(currency, date);
-        if (cached.HasValue)
+        if (cached.HasValue && cached.Value > 0)
             return cached.Value;
 
         // Fallback to SQL
@@ -56,7 +56,6 @@ public class CurrencyRateService(
         var fromRate = await GetLatestRateAsync(fromCurrency, targetDate);
         var toRate = await GetLatestRateAsync(toCurrency, targetDate);
 
-        // Conversion formula: amount * (toRate / fromRate)
         return amount * ((decimal)toRate / fromRate);
     }
 }

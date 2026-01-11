@@ -21,7 +21,11 @@ public class CurrencyRateRedisCache(IDistributedCache cache, ILoggerFactory logg
                 return null;
 
             var rates = JsonSerializer.Deserialize<Dictionary<string, decimal>>(json);
-            return rates?.GetValueOrDefault(currency);
+            if (rates is null || rates.Count < 2)
+                return null; // partial / invalid snapshot
+            if (!rates.TryGetValue(currency, out var rate) || rate <= 0)
+                return null;
+            return rate;
         }
         catch (Exception ex)
         {

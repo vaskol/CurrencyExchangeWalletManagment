@@ -12,6 +12,7 @@ public class Wallet(long id, string currency, decimal initialBalance = 0)
     {
         if (amount <= 0)
             throw new ArgumentException("Amount must be positive", nameof(amount));
+        
 
         Balance = strategy.Adjust(Balance, amount);
     }
