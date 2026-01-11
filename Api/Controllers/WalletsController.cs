@@ -2,11 +2,13 @@
 using Api.StrategyResolvers;
 using Core.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Controllers;
 
 [ApiController]
 [Route("api/wallets")]
+[EnableRateLimiting("fixed")]
 public class WalletsController(
     WalletService walletService,
     CurrencyRateService currencyRateService,

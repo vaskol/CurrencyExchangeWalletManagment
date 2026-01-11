@@ -14,15 +14,8 @@ public class CurrencyRateService(
     public virtual async Task UpdateRatesAsync()
     {
         var rates = await _rateProvider.GetLatestRatesFromEcbAsync();
-        var rowsAffected = await _rateRepository.UpsertRatesAsync(rates);
-        //var today = DateTime.UtcNow;
-
-        //CHECK THIS await _rateRepository.UpsertRatesAsync(rates);
-
-        //if (rowsAffected > 0)
-        //{
-            await _cache.SetLatestRatesToCacheAsync(rates);
-        //}
+        await _rateRepository.UpsertRatesAsync(rates);
+        await _cache.SetLatestRatesToCacheAsync(rates);
     }
     public virtual async Task<decimal> GetLatestRateAsync(string currency, DateTime date)
     {

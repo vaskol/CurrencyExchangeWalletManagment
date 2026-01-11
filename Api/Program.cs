@@ -5,10 +5,10 @@ using Adapter.SQL.Repositories;
 using Api.Jobs;
 using Core.Ports;
 using Core.Services;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
-
-
+using System.Threading.RateLimiting;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -57,6 +57,16 @@ builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<CurrencyRateService>();
 builder.Services.AddScoped<WalletService>();
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddFixedWindowLimiter("fixed", options =>
+    {
+        options.PermitLimit = 10;
+        options.Window = TimeSpan.FromSeconds(30);
+    });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -65,6 +75,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseRateLimiter();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
