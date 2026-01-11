@@ -27,6 +27,8 @@ public class WalletsController(
         {
             return BadRequest($"Invalid currency. Allowed currencies: {string.Join(", ", allowedCurrencies)}");
         }
+        if (request.InitialBalance <= 0)
+            return BadRequest("Amount must be a positive number.");
 
         var wallet = await _walletService.CreateWalletAsync(
             request.Id,
