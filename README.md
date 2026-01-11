@@ -20,7 +20,7 @@ This project is a solution for managing currency exchange and user wallets, inco
 *   **Entity Framework Core:** ORM for interacting with SQL databases.
 *   **Redis:** In-memory data store used for caching currency rates.
 *   **SQL Server:** Relational database for persistent storage.
-*   **Unit & Integration Testing:** Ensures reliability and correctness of the application logic.
+*   **Unit Testing:** Ensures reliability and correctness of the application logic.
 
 ## Project Structure
 
