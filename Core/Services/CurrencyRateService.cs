@@ -14,11 +14,17 @@ public class CurrencyRateService(
     public virtual async Task UpdateRatesAsync()
     {
         var rates = await _rateProvider.GetLatestRatesFromEcbAsync();
-        await _rateRepository.UpsertRatesAsync(rates);
-        await _cache.SetLatestRatesToCacheAsync(rates);
+        //await _rateRepository.UpsertRatesAsync(rates);
+        var rowsAffected = await _rateRepository.UpsertRatesAsync(rates);
+        if (rowsAffected > 0)
+        {
+            await _cache.SetLatestRatesToCacheAsync(rates);
+        }
     }
     public virtual async Task<decimal> GetLatestRateAsync(string currency, DateTime date)
     {
+
+        //TODO : We must retrieve from redis with each request of Wallet covnersions, current implementation needs to fetch them again, which is not what is required
         // Redis first
         var cached = await _cache.GetLatestRateFromCacheAsync(currency, date);
         if (cached.HasValue && cached.Value > 0)

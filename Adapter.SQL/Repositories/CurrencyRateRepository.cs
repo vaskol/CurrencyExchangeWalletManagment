@@ -58,7 +58,7 @@ public class CurrencyRateRepository(AppDbContext dbContext, ILoggerFactory logge
             ";
 
             totalRecordsAffected = await _dbContext.Database.ExecuteSqlRawAsync(sql, parameters.ToArray());
-            return totalRecordsAffected; // Return number of rows affected in case i dont wan update, if there are no changes to the rates
+            return totalRecordsAffected; 
         }
         catch (Exception ex)
         {
