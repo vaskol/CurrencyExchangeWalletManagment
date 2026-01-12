@@ -24,7 +24,7 @@ public class CurrencyRateService(
     public virtual async Task<decimal> GetLatestRateAsync(string currency, DateTime date)
     {
 
-        //TODO : We must retrieve from redis with each request of Wallet covnersions, current implementation needs to fetch them again, which is not what is required
+        //TODO : Currently we dont retrieve from cache when a new request of Wallet conversions is made, which is not what requested. #tofix
         // Redis first
         var cached = await _cache.GetLatestRateFromCacheAsync(currency, date);
         if (cached.HasValue && cached.Value > 0)
