@@ -72,7 +72,7 @@ To run the API:
 dotnet run --project Api
 ```
 
-The API will typically be available at `https://localhost:7001` or `http://localhost:5001`, depending on your `launchSettings.json` and environment configuration.
+The API will typically be available at `https://localhost:7270` or `http://localhost:5131`, depending on your `launchSettings.json` and environment configuration.
 
 ## Running Tests
 
