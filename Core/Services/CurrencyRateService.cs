@@ -31,11 +31,7 @@ public class CurrencyRateService(
 
         await _cache.SetLatestRatesToCacheAsync(new List<CurrencyRate>
         {
-            new() {
-                Currency = currency,
-                RateDate = date,
-                Rate = dbRate.Value
-            }
+             new(currency, dbRate.Value, date)
         });
 
         return dbRate.Value;

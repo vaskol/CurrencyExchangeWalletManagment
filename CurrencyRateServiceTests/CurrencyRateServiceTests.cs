@@ -33,18 +33,9 @@ public class CurrencyRateServiceTests
     {
         //Arrange
         var rates = new List<CurrencyRate>
-       {  new CurrencyRate
-              {
-                  Currency = "USD",
-                  Rate = 1.1m,
-                  RateDate = DateTime.UtcNow.Date
-              },
-              new CurrencyRate
-              {
-                  Currency = "GBP",
-                  Rate = 0.9m,
-                  RateDate = DateTime.UtcNow.Date
-              }
+       {
+            new CurrencyRate("USD", 1.1m, DateTime.UtcNow.Date),
+            new CurrencyRate("GBP", 0.9m, DateTime.UtcNow.Date)
         };
         var rateProviderMock = new Mock<ICurrencyRateProvider>();
         var cacheMock = new Mock<ICurrencyRateCache>();
@@ -70,18 +61,9 @@ public class CurrencyRateServiceTests
     {
         //Arrange
         var rates = new List<CurrencyRate>
-       {  new CurrencyRate
-              {
-                  Currency = "USD",
-                  Rate = 1.1m,
-                  RateDate = DateTime.UtcNow.Date
-              },
-              new CurrencyRate
-              {
-                  Currency = "GBP",
-                  Rate = 0.9m,
-                  RateDate = DateTime.UtcNow.Date
-              }
+       {
+            new CurrencyRate("USD", 1.1m, DateTime.UtcNow.Date),
+            new CurrencyRate("GBP", 0.9m, DateTime.UtcNow.Date)
         };
         var rowsAffected = 0;
         var rateProviderMock = new Mock<ICurrencyRateProvider>();

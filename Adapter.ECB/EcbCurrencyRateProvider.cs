@@ -25,25 +25,19 @@ namespace Adapter.ECB
                 var rateDate = DateTime.ParseExact(dailyCube.Attribute("time")!.Value, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
                 var rates = dailyCube.Elements(ns + "Cube")
-                     .Select(x => new CurrencyRate
-                     {
-                         Currency = x.Attribute("currency")!.Value,
-                         Rate = decimal.Parse(
+                     .Select(x => new CurrencyRate(
+                         x.Attribute("currency")!.Value,
+                         decimal.Parse(
                              x.Attribute("rate")!.Value,
                              NumberStyles.Any,
                              CultureInfo.InvariantCulture
                          ),
-                         RateDate = rateDate
-                     })
+                         rateDate
+                     ))
                      .ToList();
 
                 // Add EUR manually, which is the base currency
-                rates.Add(new CurrencyRate
-                {
-                    Currency = "EUR",
-                    Rate = 1m,
-                    RateDate = rateDate
-                });
+                rates.Add(new CurrencyRate("EUR", 1m, rateDate));
 
                 return rates;
             }

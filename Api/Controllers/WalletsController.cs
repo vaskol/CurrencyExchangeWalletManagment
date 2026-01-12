@@ -24,14 +24,12 @@ public class WalletsController(
     [HttpPost]
     public async Task<ActionResult<WalletResponse>> CreateWallet([FromBody] CreateWalletRequest request)
     {
-        var allowedCurrencies = _configuration.GetSection("AllowedCurrencies").Get<string[]>();
+        var allowedCurrencies = _configuration.GetSection("AllowedCurrencies").Get<string[]>() ?? [];
         if (string.IsNullOrWhiteSpace(request.Currency) || !allowedCurrencies.Contains(request.Currency.ToUpper()))
         {
             return BadRequest($"Invalid currency. Allowed currencies: {string.Join(", ", allowedCurrencies)}");
         }
-        if (request.InitialBalance <= 0)
-            return BadRequest("Amount must be a positive number.");
-
+        
         var wallet = await _walletService.CreateWalletAsync(
             request.Id,
             request.Currency.ToUpper(),
@@ -110,7 +108,7 @@ public class WalletsController(
         if (string.IsNullOrWhiteSpace(currency))
             currency = wallet.Currency;
 
-        var allowedCurrencies = _configuration.GetSection("AllowedCurrencies").Get<string[]>();
+        var allowedCurrencies = _configuration.GetSection("AllowedCurrencies").Get<string[]>() ?? [];
         if (!allowedCurrencies.Contains(currency.ToUpper()))
         {
             return BadRequest($"Invalid currency. Allowed currencies: {string.Join(", ", allowedCurrencies)}");

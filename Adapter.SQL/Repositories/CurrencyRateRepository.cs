@@ -30,7 +30,7 @@ public class CurrencyRateRepository(AppDbContext dbContext, ILoggerFactory logge
                 new SqlParameter($"@currency{i}", r.Currency),
                 new SqlParameter($"@rate{i}", r.Rate),
                 new SqlParameter($"@rateDate{i}", r.RateDate),
-                //new SqlParameter($"@ratePretty{i}", NumberFormattingHelper.ToPrettyAmount(r.Rate)) IF we want
+                //new SqlParameter($"@ratePretty{i}", NumberFormattingHelper.ToPrettyAmount(r.Rate)) 
             });
             }
 
@@ -58,7 +58,7 @@ public class CurrencyRateRepository(AppDbContext dbContext, ILoggerFactory logge
             ";
 
             totalRecordsAffected = await _dbContext.Database.ExecuteSqlRawAsync(sql, parameters.ToArray());
-            return totalRecordsAffected;
+            return totalRecordsAffected; // Return number of rows affected in case i dont wan update, if there are no changes to the rates
         }
         catch (Exception ex)
         {
