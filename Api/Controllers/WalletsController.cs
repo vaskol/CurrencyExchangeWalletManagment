@@ -29,7 +29,11 @@ public class WalletsController(
         {
             return BadRequest($"Invalid currency. Allowed currencies: {string.Join(", ", allowedCurrencies)}");
         }
-        
+        if (request.InitialBalance < 0)
+        {
+            return BadRequest("Initial balance cannot be below zero.");
+        }
+
         var wallet = await _walletService.CreateWalletAsync(
             request.Id,
             request.Currency.ToUpper(),
